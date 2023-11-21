@@ -56,6 +56,7 @@ public class Main {
         paramMap.put("b0StartInd", System.getProperty("b0StartInd"));
         paramMap.put("hardClauseWeight", System.getProperty("hardClauseWeight"));
         paramMap.put("outFileName", System.getProperty("outFileName"));
+        paramMap.put("obj_", System.getProperty("obj_"));
 
         for (String param : Arrays.asList("dataPath", "xStartInd", "b0StartInd", "hardClauseWeight")) {
             if (paramMap.get(param) == null) {
@@ -71,6 +72,7 @@ public class Main {
         //
         String constsPath = null;
         String distanceClassPath = null;
+        String obj_ = paramMap.get("obj_").toString(); //md_ms or md
         //
         if (paramMap.get("constsPath") == null) {
             System.out.println("No constsPath provided -Implementing Smart Pair without ML CL Constraints");
@@ -231,6 +233,11 @@ public class Main {
             int hat_connCompIndex = connCompIndex;
             loop12_20:
             for (int w = 0; w < distanceClasseList.size(); w++) {
+                // if obj is md, then skip this part as 30,31 irrelevant
+                if (obj_.equals("md")){
+                    System.out.println("*opt for md only, skipping 12-20");
+                    break loop12_20;
+                }
                 List<List<Double>> distanceClass = distanceClasseList.get(w);
                 //            System.out.println("Distance class " + w + ":");
                 for (List<Double> pair : distanceClass) {
@@ -336,8 +343,11 @@ public class Main {
             Util.writeListToFile(clauseList_25_26, bw);
             Util.writeListToFile(clauseList_27_28, bw);
             Util.writeListToFile(clauseList_29, bw);
+            // clauses for md, if opt for md, 12-20 skipped, 30_31 will be empty, b0b1 only contains b0
             Util.writeListToFile(clauseList_30_31, bw);
             Util.writeListToFile(clauseList_b0_b1, bw);
+
+
             System.out.printf("SmartPair Finished, %d clauses write to %s\n",
                     clauseList_22_23.size()
                     +clauseList_24.size()
@@ -346,6 +356,14 @@ public class Main {
                     +clauseList_29.size()
                     +clauseList_30_31.size()
                     +clauseList_b0_b1.size(),outFileName);
+            System.out.println("clauseList_22_23: " + clauseList_22_23.size());
+            System.out.println("clauseList_24: " + clauseList_24.size());
+            System.out.println("clauseList_25_26: " + clauseList_25_26.size());
+            System.out.println("clauseList_27_28: " + clauseList_27_28.size());
+            System.out.println("clauseList_29: " + clauseList_29.size());
+            System.out.println("clauseList_30_31: " + clauseList_30_31.size());
+            System.out.println("clauseList_b0_b1: " + clauseList_b0_b1.size());
+
             System.out.println("========= Smart Pair Finished =========");
         } catch (IOException e) {
             e.printStackTrace();
